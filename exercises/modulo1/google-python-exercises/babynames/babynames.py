@@ -33,35 +33,23 @@ Suggested milestones for incremental development:
  -Build the [year, 'name rank', ... ] list and print it
  -Fix main() to use the extract_names list
 """
-def extract_name_ranks(filename):
-    res = []
-    file = open(filename)
-    for line in file:
-        match = re.match(r'<tr align="right"><td>(\d+)</td><td>(\w+)</td><td>(\w+)</td>', line)
-        if match:
-            res.append([match.group(2), match.group(1)])
-            res.append([match.group(3), match.group(1)])
-
-    file.close()
-
-    res.sort(key=lambda kv: kv[0])
-    return res
-
 def extract_names(filename):
     """
     Given a file name for baby.html, returns a list starting with the year string
     followed by the name-rank strings in alphabetical order.
     ['2006', 'Aaliyah 91', Aaron 57', 'Abagail 895', ' ...]
     """
-    res = []
-    year = re.search(r'(\d+)(.html)$', filename).group(1)
-    res.append(year)
+    file = open(filename, 'r')
+    file_content = file.read()
+    year = re.findall(r'Popularity in ([0-9]{4})', file_content)
 
-    name_ranks = extract_name_ranks(filename)
-    for name, rank in name_ranks:
-        res.append('%s %s' % (name, rank))
+    rank_names = []
+    pattern = r'<tr align="right"><td>(?P<rank>\d+)</td><td>(?P<male>\w+)</td><td>(?P<female>\w+)</td>'
+    for match in re.finditer(pattern, file_content):
+        rank_names.append([match.group('male'), match.group('rank')])
+        rank_names.append([match.group('female'), match.group('rank')])
 
-    return res
+    return year + ['{} {}'.format(name, rank) for name, rank in sorted(rank_names)]
 
 
 def main():
@@ -80,11 +68,16 @@ def main():
         summary = True
         del args[0]
 
-        # +++your code here+++
-        # For each filename, get the names, then either print the text output
-        # or write it to a summary file
+    # For each filename, get the names, then either print the text output
+    # or write it to a summary file
     for filename in args:
-        print(extract_names(filename))
+        ranked_names = extract_names(filename)
+        if summary:
+            file = open('summary.log', 'a')
+            file.write(', '.join(ranked_names) + '\n')
+            file.close()
+        else:
+            print(ranked_names)
 
 
 if __name__ == '__main__':
