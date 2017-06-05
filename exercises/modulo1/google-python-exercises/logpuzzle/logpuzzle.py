@@ -25,19 +25,17 @@ def read_urls(filename):
     Screens out duplicate urls and returns the urls sorted into
     increasing order."""
 
-    file = open(filename)
     res = []
-    for line in file:
-        match = re.match(r'(.*)("GET )(.*.jpg)(.*)$', line)
-        if match:
-            if match.group(3) in res:
-                print('Imagem duplicated', match.group(3))
-            else:
-                res.append(match.group(3))
-
-    res.sort()
-    return res
-    # +++your code here+++
+    file = open(filename)
+    file_content = file.read()
+    file.close()
+    for match in re.finditer(r'(.*)("GET )(?P<url>.*.jpg)(.*)', file_content):
+        if match.group('url') in res:
+            print('Img duplicada', match.group('url'))
+        else:
+            res.append(match.group('url'))
+    
+    return sorted(res)
 
 
 def download_images(img_urls, dest_dir):
@@ -53,9 +51,9 @@ def download_images(img_urls, dest_dir):
     base_url = 'http://code.google.com'
     for url in img_urls:
         img_name = os.path.basename(url)
-        print(dest_dir + img_name, '...')
+        print(os.path.join(dest_dir, img_name), '...')
 
-        urllib.request.urlretrieve(base_url + url, dest_dir + '/' + img_name)
+        urllib.request.urlretrieve(base_url + url, os.path.join(dest_dir, img_name))
 
     print('Download completed pessoal \\o/')
 
