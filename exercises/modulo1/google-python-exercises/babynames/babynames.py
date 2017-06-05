@@ -41,6 +41,8 @@ def extract_names(filename):
     """
     file = open(filename, 'r')
     file_content = file.read()
+    file.close()
+    
     year = re.findall(r'Popularity in ([0-9]{4})', file_content)
 
     rank_names = []
